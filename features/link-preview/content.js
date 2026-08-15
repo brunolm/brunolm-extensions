@@ -94,9 +94,12 @@
       if (typeof summary === 'string') throw new Error(summary);
       log('preview-apply', { url, points: summary?.points?.length ?? 0, hasCard: Boolean(card) });
       showResult(url, {
-        url,
-        host: hostnameOf(url),
-        title: hostnameOf(url),
+        url: summary?.url || url,
+        host: summary?.host || hostnameOf(url),
+        title: summary?.title || hostnameOf(url),
+        description: summary?.description,
+        image: summary?.image,
+        hero: summary?.hero,
         blurb: summary?.blurb,
         points: summary?.points,
         error: summary?.error === 'no-host' ? 'Install the Grok CLI host in brunolm → Link Preview.' : '',
@@ -150,11 +153,18 @@
 
     if (data.image) {
       const img = document.createElement('img');
-      img.className = 'lp-image';
+      img.className = data.hero === false ? 'lp-icon' : 'lp-image';
       img.src = data.image;
       img.alt = '';
       img.addEventListener('error', () => img.remove());
-      card.appendChild(img);
+      if (data.hero === false) {
+        const wrap = document.createElement('div');
+        wrap.className = 'lp-icon-wrap';
+        wrap.appendChild(img);
+        card.appendChild(wrap);
+      } else {
+        card.appendChild(img);
+      }
     }
 
     const body = document.createElement('div');

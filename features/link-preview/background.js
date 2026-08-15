@@ -38,16 +38,33 @@ async function getSummary(rawUrl) {
     page.description = extracted.description;
     page.text = extracted.text;
     page.url = extracted.url || page.url;
+    page.host = hostnameOf(page.url);
+    page.image = extracted.image;
+    page.hero = extracted.hero;
+  }
+  if (!page.image) {
+    page.image = faviconFor(page.url);
+    page.hero = false;
   }
   fileLog('extract', {
     url: page.url,
     ok: Boolean(extracted?.text),
     title: page.title,
     textChars: extracted?.text?.length ?? 0,
+    image: page.image,
+    hero: Boolean(page.hero),
   });
 
-  const summary = await askGrok(page, !extracted?.text);
-  fileLog('summarize-done', { url: page.url, points: summary.points?.length ?? 0 });
+  const summary = {
+    ...(await askGrok(page, !extracted?.text)),
+    url: page.url,
+    host: page.host,
+    title: page.title,
+    description: page.description || '',
+    image: page.image,
+    hero: Boolean(page.hero),
+  };
+  fileLog('summarize-done', { url: page.url, points: summary.points?.length ?? 0, image: page.image });
   cache.set(page.url, { at: Date.now(), summary });
   if (cache.size > 40) cache.delete(cache.keys().next().value);
   return summary;
@@ -79,9 +96,15 @@ async function tryExtract(url) {
       .trim()
       .slice(0, 4_000);
     if (!text) return null;
-    const title = html.match(/<title[^>]*>([^<]+)/i)?.[1]?.trim() ?? '';
-    const description = html.match(/content=["']([^"']+)["'][^>]*(?:name|property)=["']description["']/i)?.[1] ?? '';
-    return { url: res.url || url, title, description, text };
+    const finalUrl = res.url || url;
+    const title = decodeEntities(html.match(/<title[^>]*>([^<]+)/i)?.[1]?.trim() ?? '');
+    const description = decodeEntities(
+      metaContent(html, ['og:description', 'twitter:description', 'description']),
+    );
+    const og = metaContent(html, ['og:image', 'og:image:url', 'twitter:image']);
+    const icon = linkHref(html, ['apple-touch-icon', 'icon', 'shortcut icon']);
+    const image = absolutize(finalUrl, og || icon) || faviconFor(finalUrl);
+    return { url: finalUrl, title, description, text, image, hero: Boolean(og) };
   } catch (err) {
     fileLog('extract-fail', { url, error: err.message });
     return null;
@@ -186,6 +209,55 @@ function normalizeHttpUrl(value) {
   } catch {
     return '';
   }
+}
+
+function metaContent(html, names) {
+  for (const name of names) {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const a = html.match(
+      new RegExp(`<meta[^>]+(?:property|name)\\s*=\\s*["']${escaped}["'][^>]*content\\s*=\\s*["']([^"']*)["']`, 'i'),
+    );
+    if (a?.[1]) return a[1];
+    const b = html.match(
+      new RegExp(`<meta[^>]+content\\s*=\\s*["']([^"']*)["'][^>]*(?:property|name)\\s*=\\s*["']${escaped}["']`, 'i'),
+    );
+    if (b?.[1]) return b[1];
+  }
+  return '';
+}
+
+function linkHref(html, rels) {
+  for (const rel of rels) {
+    const escaped = rel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const a = html.match(new RegExp(`<link[^>]+rel\\s*=\\s*["'][^"']*${escaped}[^"']*["'][^>]*href\\s*=\\s*["']([^"']+)["']`, 'i'));
+    if (a?.[1]) return a[1];
+    const b = html.match(new RegExp(`<link[^>]+href\\s*=\\s*["']([^"']+)["'][^>]*rel\\s*=\\s*["'][^"']*${escaped}[^"']*["']`, 'i'));
+    if (b?.[1]) return b[1];
+  }
+  return '';
+}
+
+function absolutize(base, href) {
+  if (!href) return '';
+  try {
+    return new URL(href, base).toString();
+  } catch {
+    return '';
+  }
+}
+
+function faviconFor(url) {
+  const host = hostnameOf(url);
+  return host ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128` : '';
+}
+
+function decodeEntities(text) {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'");
 }
 
 function hostnameOf(url) {
