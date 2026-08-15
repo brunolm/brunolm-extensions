@@ -8,17 +8,12 @@ export function handle(type, fn) {
 }
 
 export function listen() {
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  chrome.runtime.onMessage.addListener((message, sender) => {
     if (!message?.type) return;
     const fn = handlers.get(message.type);
     if (!fn) return;
-
-    const out = fn(message, sender);
-    if (out && typeof out.then === 'function') {
-      out.then(sendResponse, (err) => sendResponse(err?.message ?? String(err)));
-      return true;
-    }
-
-    if (out !== undefined) sendResponse(out);
+    return Promise.resolve()
+      .then(() => fn(message, sender))
+      .catch((err) => err?.message ?? String(err));
   });
 }

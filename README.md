@@ -14,6 +14,19 @@ Reload the extension after any `manifest.json` change.
 
 ## Features
 
+### Link Preview
+
+Long-press a link (primary button, ~550ms) to see a tooltip with the page title, description, image, and Grok key points.
+
+1. Load the unpacked extension and copy its ID from `brave://extensions`.
+2. From this repo folder run:
+   `pwsh -File features/link-preview/native/install.ps1 -ExtensionId <id>`
+3. Reload the extension. Popup → **Link Preview** → **Test Grok host**.
+4. Long-press any `http(s)` link. Grok fetches the page (including `t.co` redirects) and returns key points.
+5. **Open link** in the card, click away, or press Escape to dismiss. A normal click still navigates.
+
+The extension never stores an API key. The native host (`com.brunolm.link_preview`) launches your local `grok` CLI (logged-in `~/.grok` credentials).
+
 ### Video Download
 
 Detects videos and audio on the current page and lets you download them. Everything runs locally — no accounts, no tokens, no external services.
