@@ -9,9 +9,11 @@ Desktop.ini
 *.swp
 *~
 
-# Local agent overrides
-CLAUDE.local.md
-*.local.md
+# Local overrides
+*.local.*
+
+# Patchright / Playwright MCP session dumps
+.playwright-mcp/
 
 # Scratch / generated previews
 icons/_src/
