@@ -1,0 +1,28 @@
+.sg-pop {
+  padding: 14px;
+}
+
+.sg-lead,
+.sg-note {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.sg-lead {
+  margin-bottom: 10px;
+}
+
+.sg-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sg-btn:hover {
+  background: #2563eb;
+}

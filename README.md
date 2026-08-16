@@ -27,6 +27,10 @@ Long-press a link (primary button, ~550ms) to see a tooltip with the page title,
 
 The extension never stores an API key. The native host (`com.brunolm.link_preview`) launches your local `grok` CLI (logged-in `~/.grok` credentials).
 
+### Steam Gameplay
+
+On a Steam store app page, a **YouTube gameplay** row appears under the game title: thumbnails of `{game} gameplay` plus **More on YouTube**.
+
 ### Video Download
 
 Detects videos and audio on the current page and lets you download them. Everything runs locally — no accounts, no tokens, no external services.

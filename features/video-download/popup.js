@@ -63,12 +63,13 @@ function buildGroups(items) {
 
   return [...byKey.values()].map((variants) => {
     variants.sort((a, b) => pixelsOf(b) - pixelsOf(a));
-    return { variants, current: variants[0] };
+    const foundAt = Math.max(...variants.map((item) => item.foundAt ?? 0));
+    return { variants, current: variants[0], foundAt };
   });
 }
 
 function render(groups, tab, pageThumb, ui) {
-  groups.sort((a, b) => (b.current.size ?? 0) - (a.current.size ?? 0));
+  groups.sort((a, b) => b.foundAt - a.foundAt);
 
   for (const group of groups) {
     ui.list.appendChild(renderItem(group, tab, pageThumb, ui));

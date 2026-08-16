@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "brunolm",
   "description": "BrunoLM's personal grab-bag of browser tools.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "brunolm",
@@ -35,6 +35,12 @@
       "all_frames": false
     },
     {
+      "matches": ["*://store.steampowered.com/app/*"],
+      "js": ["features/steam-gameplay/content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
       "matches": ["*://*.x.com/*", "*://*.twitter.com/*"],
       "js": ["features/video-download/injected/x-main.js"],
       "run_at": "document_start",
@@ -60,7 +66,10 @@
   "host_permissions": ["<all_urls>"],
   "web_accessible_resources": [
     {
-      "resources": ["features/link-preview/tooltip.css"],
+      "resources": [
+        "features/link-preview/tooltip.css",
+        "features/steam-gameplay/panel.css"
+      ],
       "matches": ["<all_urls>"]
     }
   ]

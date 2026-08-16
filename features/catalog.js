@@ -12,4 +12,10 @@ export const features = [
     description: 'Long-press a link for a preview and Grok key points',
     load: () => import('./link-preview/popup.js'),
   },
+  {
+    id: 'steam-gameplay',
+    name: 'Steam Gameplay',
+    description: 'YouTube gameplay links on Steam store pages',
+    load: () => import('./steam-gameplay/popup.js'),
+  },
 ];

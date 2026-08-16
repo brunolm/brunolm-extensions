@@ -4,6 +4,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
@@ -37,6 +38,10 @@ async function main() {
     writeMessage({ ok: true, grok: findGrok(), log: LOG_PATH });
     return;
   }
+  if (message.type === 'http') {
+    writeMessage(await runHttp(message));
+    return;
+  }
   if (message.type !== 'summarize' || !message.prompt) {
     writeMessage({ ok: false, error: 'expected { type: "summarize", prompt }', log: LOG_PATH });
     return;
@@ -44,6 +49,75 @@ async function main() {
 
   const text = await runGrok(message.prompt, Boolean(message.fetch));
   writeMessage({ ok: true, text, log: LOG_PATH });
+}
+
+async function runHttp(message) {
+  const script = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'steam-gameplay', 'native', 'fetch.py');
+  log('http-start', { url: message.url, method: message.method || 'GET' });
+  const { code, stdout, stderr } = await spawnProcess(findPython(), [script], JSON.stringify({
+    url: message.url,
+    method: message.method || 'POST',
+    headers: message.headers || {},
+    body: message.body || '',
+    impersonate: message.impersonate || 'chrome',
+    timeout: message.timeout || 15,
+  }));
+  if (code !== 0 && !stdout) {
+    log('http-fail', { code, stderr: clip(stderr) });
+    return {
+      ok: false,
+      error:
+        firstLine(stderr) ||
+        (code === 3221225781 || code === -1073741515
+          ? 'Wrong python (DLL not found). Re-run install.ps1 so PYTHON points at the mise interpreter with curl_cffi.'
+          : `curl_cffi exited ${code}`),
+    };
+  }
+  try {
+    const data = JSON.parse(stdout);
+    log('http-done', { status: data.status, chars: (data.text || '').length, error: data.error || '' });
+    return data;
+  } catch {
+    log('http-bad-json', { stdout: clip(stdout), stderr: clip(stderr) });
+    return { ok: false, error: firstLine(stderr) || 'curl_cffi returned non-JSON' };
+  }
+}
+
+function findPython() {
+  if (process.env.PYTHON) return process.env.PYTHON;
+  return 'python';
+}
+
+function spawnProcess(cmd, args, stdinText) {
+  return new Promise((resolve, reject) => {
+    const env = { ...process.env };
+    const dir = path.dirname(cmd);
+    if (dir && dir !== '.') env.PATH = `${dir}${path.delimiter}${env.PATH || ''}`;
+    const child = spawn(cmd, args, {
+      env,
+      windowsHide: true,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    const out = [];
+    const err = [];
+    child.stdout.on('data', (chunk) => out.push(chunk));
+    child.stderr.on('data', (chunk) => err.push(chunk));
+    child.on('error', reject);
+    if (stdinText) child.stdin.end(stdinText);
+    else child.stdin.end();
+    const timer = setTimeout(() => {
+      child.kill();
+      reject(new Error('curl_cffi timed out'));
+    }, 20_000);
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      resolve({
+        code: code ?? 1,
+        stdout: Buffer.concat(out).toString('utf8'),
+        stderr: Buffer.concat(err).toString('utf8'),
+      });
+    });
+  });
 }
 
 function findGrok() {
