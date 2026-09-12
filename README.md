@@ -27,6 +27,18 @@ Long-press a link (primary button, ~550ms) to see a tooltip with the page title,
 
 The extension never stores an API key. The native host (`com.brunolm.link_preview`) launches your local `grok` CLI (logged-in `~/.grok` credentials).
 
+### New Tab
+
+Replaces the browser new tab page (`chrome_url_overrides`). Brave/Chrome asks to confirm the override the first time — keep it.
+
+- **Top left** — local time (big), today's date, then Miami (`America/New_York`) and LA (`America/Los_Angeles`) time. Add or drop a row in the `ZONES` list in `clock.js`.
+- **Center** — favicon shortcuts with the name under each. Hover a tile → ✎ to edit or delete it; the dashed **Add** tile creates one. Name, URL, and an optional custom icon URL. Icons come from the browser's own favicon cache (`favicon` permission), so nothing is requested from a third party; paste an icon URL for sites the browser has no favicon for.
+- **Search** — type a query and hit Search. It runs on **every selected engine** (Google, Bing, Brave, DuckDuckGo, Startpage, Ecosia, Perplexity, YouTube, GitHub, Wikipedia): the first opens in this tab, the rest in background tabs. The selection is remembered.
+- **Top right** — weather for the location of your IP: current conditions plus a small 5-day forecast. Click the temperature to switch °C / °F.
+- **Bottom** — **My IP & location** opens a modal that reveals the IPv4 and IPv6 addresses (each click-to-copy; a family with no connectivity shows *Not available*), city/country, provider, time zone, and coordinates, with **Refresh**. Nothing is shown until you open it.
+
+Shortcuts, engine selection, and the unit toggle live in `chrome.storage.sync`. Weather (15 min) and IP (30 min) are cached in `chrome.storage.local` and fetched by the service worker from [open-meteo.com](https://open-meteo.com), `ipwho.is` (falling back to `ipapi.co`) for geolocation, and `api4/api6.ipify.org` for the two address families. No API keys.
+
 ### Steam Gameplay
 
 On a Steam store app page, a **YouTube gameplay** row appears under the game title: thumbnails of `{game} gameplay` plus **More on YouTube**.
@@ -126,6 +138,7 @@ Content scripts stay classic IIFEs (not modules) unless there is a reason not to
 | `chrome.storage` keys | `<prefix>:<name>` | `vdh:media_${tabId}` |
 | CSS classes / ids | `<prefix>-*` | `vdh-item` |
 | Page `CustomEvent` names | `__brunolm_<prefix>_*` | `__brunolm_vdh_found` |
+| Extension pages | `features/<id>/<page>.html` | `features/new-tab/newtab.html` |
 | Protocol constants | `features/<id>/protocol.js` | `VDH.GET_MEDIA` |
 
 Do **not** use the `brunolm:` prefix. That is reserved for the shell (`brunolm:last-feature`).

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>New Tab</title>
+  <link rel="stylesheet" href="newtab.css" />
+</head>
+<body>
+  <header class="nt-top">
+    <section class="nt-clock">
+      <div id="nt-time" class="nt-time">--:--</div>
+      <div id="nt-date" class="nt-date"></div>
+      <div id="nt-zones" class="nt-zones"></div>
+    </section>
+    <section id="nt-weather" class="nt-weather" aria-live="polite"></section>
+  </header>
+
+  <main class="nt-main">
+    <div id="nt-sites" class="nt-sites"></div>
+
+    <form id="nt-search" class="nt-search" autocomplete="off">
+      <div class="nt-search-row">
+        <input id="nt-query" type="text" placeholder="Search…" aria-label="Search" autofocus />
+        <button type="submit" class="nt-btn nt-btn-primary">Search</button>
+      </div>
+      <div id="nt-engines" class="nt-engines"></div>
+    </form>
+  </main>
+
+  <footer class="nt-bottom">
+    <button id="nt-ip-open" type="button" class="nt-btn nt-btn-ghost">My IP &amp; location</button>
+  </footer>
+
+  <dialog id="nt-site-dialog" class="nt-dialog">
+    <form id="nt-site-form" method="dialog">
+      <h2 id="nt-site-title">Add shortcut</h2>
+      <label class="nt-field">
+        <span>Name</span>
+        <input id="nt-site-name" type="text" maxlength="40" placeholder="GitHub" />
+      </label>
+      <label class="nt-field">
+        <span>URL</span>
+        <input id="nt-site-url" type="text" placeholder="github.com" required />
+      </label>
+      <label class="nt-field">
+        <span>Icon URL <em>(optional)</em></span>
+        <input id="nt-site-icon" type="text" placeholder="https://…/icon.png" />
+      </label>
+      <p id="nt-site-error" class="nt-error"></p>
+      <div class="nt-dialog-actions">
+        <button id="nt-site-delete" type="button" class="nt-btn nt-btn-danger">Delete</button>
+        <span class="nt-spacer"></span>
+        <button id="nt-site-cancel" type="button" class="nt-btn nt-btn-ghost">Cancel</button>
+        <button type="submit" class="nt-btn nt-btn-primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="nt-ip-dialog" class="nt-dialog">
+    <h2>IP &amp; location</h2>
+    <div id="nt-ip-body" class="nt-ip-body"></div>
+    <div class="nt-dialog-actions">
+      <span class="nt-spacer"></span>
+      <button id="nt-ip-refresh" type="button" class="nt-btn nt-btn-ghost">Refresh</button>
+      <button id="nt-ip-close" type="button" class="nt-btn nt-btn-primary">Close</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="newtab.js"></script>
+</body>
+</html>

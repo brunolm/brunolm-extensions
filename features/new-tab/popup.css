@@ -1,0 +1,36 @@
+.nt-pop {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+}
+
+.nt-pop-lead {
+  font-size: 13px;
+}
+
+.nt-pop-note {
+  color: #3b82f6;
+  font-size: 12px;
+}
+
+.nt-pop-hint {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.nt-pop-btn {
+  align-self: flex-start;
+  padding: 7px 12px;
+  border: 1px solid #e6e8ee;
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.nt-pop-btn:hover {
+  border-color: #3b82f6;
+}

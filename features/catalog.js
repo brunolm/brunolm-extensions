@@ -13,6 +13,12 @@ export const features = [
     load: () => import('./link-preview/popup.js'),
   },
   {
+    id: 'new-tab',
+    name: 'New Tab',
+    description: 'Clock, shortcuts, multi-engine search, weather and IP on the new tab page',
+    load: () => import('./new-tab/popup.js'),
+  },
+  {
     id: 'steam-gameplay',
     name: 'Steam Gameplay',
     description: 'YouTube gameplay links on Steam store pages',
